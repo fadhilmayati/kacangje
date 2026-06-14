@@ -1,0 +1,122 @@
+[
+  {
+    "icon": "💰",
+    "title": "Kira Gaji Pekerja",
+    "description": "Payroll bulanan — EPF, SOCSO, OT",
+    "category": "accounting",
+    "prompt": "Saya nak kira gaji bulanan untuk 20 orang pekerja. Gaji pokok RM1,800 seorang. 5 orang kerja OT 15 jam. Boleh tolong kirakan termasuk EPF, SOCSO, EIS?",
+    "action": "gaji"
+  },
+  {
+    "icon": "💼",
+    "title": "Kira Gaji + OT",
+    "description": "Gaji dengan jam lebih masa terperinci",
+    "category": "accounting",
+    "prompt": "Kira gaji untuk 5 pekerja dengan gaji pokok RM2,500. Setiap pekerja buat OT 20 jam dengan kadar 1.5. Termasuk elaun minyak RM200 setiap seorang.",
+    "action": "gaji"
+  },
+  {
+    "icon": "📁",
+    "title": "Susun Fail dalam Folder",
+    "description": "Organize PDF, Excel, docs ikut tarikh",
+    "category": "office",
+    "prompt": "Tolong susun semua fail dalam folder Downloads saya ikut tarikh. Buat dry run dulu ya.",
+    "action": "susun-fail"
+  },
+  {
+    "icon": "📁",
+    "title": "Susun Fail ikut Jenis",
+    "description": "Pisahkan PDF, JPG, DOCX ke folder berasingan",
+    "category": "office",
+    "prompt": "Susun fail dalam folder /Users/ali/Documents ikut jenis fail. PDF masuk folder PDF, gambar masuk folder Gambar, etc.",
+    "action": "susun-fail"
+  },
+  {
+    "icon": "📄",
+    "title": "Buat Invoice Pelanggan",
+    "description": "Generate invoice untuk client baru",
+    "category": "accounting",
+    "prompt": "Buat invoice untuk Kedai Runcit Ali — 3 item: Beras 10 kampit (RM38 each), Minyak masak 20 paket (RM5 each), Gula 15 kg (RM2.50 each). SST 6%.",
+    "action": "invoice"
+  },
+  {
+    "icon": "📄",
+    "title": "Invoice Servis",
+    "description": "Invoice untuk servis kontraktor atau perunding",
+    "category": "accounting",
+    "prompt": "Buat invoice untuk konsultasi: 10 jam servis kepakaran pada RM200 sejam. Client: Syarikat Maju Jaya Sdn Bhd.",
+    "action": "invoice"
+  },
+  {
+    "icon": "📊",
+    "title": "Analisis Data Jualan",
+    "description": "Baca CSV dan tunjuk profit/loss",
+    "category": "data",
+    "prompt": "Saya ada fail jualan.csv dalam folder Documents. Boleh analisis profit margin untuk tahun ni?",
+    "action": "excel-analisis"
+  },
+  {
+    "icon": "📊",
+    "title": "Top Produk Terlaris",
+    "description": "Cari produk paling laku dari data jualan",
+    "category": "data",
+    "prompt": "Baca fail CSV data jualan dan tunjuk top 10 produk paling laku. Kolom produk nama 'Produk' dan kolom quantity 'Terjual'.",
+    "action": "excel-analisis"
+  },
+  {
+    "icon": "✉️",
+    "title": "Email Customer Lewat Bayar",
+    "description": "Draft email reminder dalam BM",
+    "category": "docs",
+    "prompt": "Tulis email dalam Bahasa Malaysia untuk customer yang lewat bayar 30 hari. Nama customer: Kedai Buku Aminah. Jumlah tertunggak: RM1,250. Nada sopan tapi tegas.",
+    "action": null
+  },
+  {
+    "icon": "✉️",
+    "title": "Email Quotes untuk Client",
+    "description": "Draft quotation email untuk prospek baru",
+    "category": "docs",
+    "prompt": "Tulis email quotation dalam BM untuk client baru. Kita offer servis kebersihan pejabat RM800 sebulan. Client: Pejabat Cikgu Rahim.",
+    "action": null
+  },
+  {
+    "icon": "📝",
+    "title": "Surat Tawaran Kerja",
+    "description": "Draft offer letter dalam BM",
+    "category": "docs",
+    "prompt": "Tulis surat tawaran kerja untuk position Pembantu Akaun. Gaji RM2,200. Start 1 bulan depan. Nama pekerja: Nurul Aisyah.",
+    "action": null
+  },
+  {
+    "icon": "📝",
+    "title": "Kontrak Pekerja Part-Time",
+    "description": "Draft kontrak ringkas untuk part-timer",
+    "category": "docs",
+    "prompt": "Tulis kontrak pekerja part-time untuk 3 bulan. 20 jam seminggu, RM10 sejam. Scope: bantuan admin pejabat.",
+    "action": null
+  },
+  {
+    "icon": "📋",
+    "title": "Daftar Stok Masuk/Keluar",
+    "description": "Template tracking stok guna spreadsheet",
+    "category": "office",
+    "prompt": "Bantu saya buat template tracking stok barang. Saya nak track: nama barang, quantity masuk, quantity keluar, baki stok, tarikh. Guna format yang mudah nak copy ke Excel.",
+    "action": null
+  },
+  {
+    "icon": "📋",
+    "title": "Jadual Bertugas Pekerja",
+    "description": "Buat roster mingguan untuk 10 orang staff",
+    "category": "office",
+    "prompt": "Buat jadual bertugas mingguan untuk 10 orang pekerja. Setiap hari perlu 4 orang. Termasuk hari Sabtu half-day. Guna format jadual.",
+    "action": null
+  },
+  {
+    "icon": "💡",
+    "title": "Cara Kurangkan Cukai Bisnes",
+    "description": "Tips percuma untuk SME",
+    "category": "accounting",
+    "prompt": "Bagi tips ringkas cara SME boleh optimakan cukai pendapatan secara sah. Fokus pada perbelanjaan yang boleh dituntut dan pelepasan untuk 2025-2026.",
+    "action": null
+  }
+]

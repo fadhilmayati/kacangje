@@ -1,0 +1,727 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>kacangje — 🇲🇾 AI Pembantu SME</title>
+<style>
+  :root {
+    --bg: #f8fafc;
+    --surface: #ffffff;
+    --sidebar: #1e293b;
+    --sidebar-hover: #334155;
+    --primary: #3b82f6;
+    --primary-hover: #2563eb;
+    --text: #1e293b;
+    --text-secondary: #64748b;
+    --border: #e2e8f0;
+    --user-msg: #3b82f6;
+    --ai-msg: #f1f5f9;
+    --success: #22c55e;
+    --warning: #f59e0b;
+    --radius: 12px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.1);
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans Malayalam', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    display: flex;
+    height: 100vh;
+    overflow: hidden;
+  }
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+
+  /* Sidebar */
+  #sidebar {
+    width: 280px;
+    background: var(--sidebar);
+    color: #f8fafc;
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: transform 0.2s;
+  }
+  #sidebar.hidden { transform: translateX(-280px); width: 0; overflow: hidden; }
+  .sidebar-header {
+    padding: 20px;
+    border-bottom: 1px solid #334155;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .sidebar-header h2 { font-size: 18px; display: flex; align-items: center; gap: 8px; }
+  .sidebar-header h2 span { font-size: 20px; }
+  #sidebar-toggle {
+    background: none;
+    border: none;
+    color: #94a3b8;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 6px;
+  }
+  #sidebar-toggle:hover { background: var(--sidebar-hover); color: #fff; }
+
+  .template-section { padding: 16px 12px; }
+  .template-section h3 {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: #94a3b8;
+    margin-bottom: 12px;
+    padding: 0 8px;
+  }
+  .tmpl-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: #cbd5e1;
+    padding: 10px 12px;
+    border-radius: 8px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: 2px;
+  }
+  .tmpl-btn:hover { background: var(--sidebar-hover); color: #fff; }
+  .tmpl-btn .tmpl-icon { margin-right: 8px; font-size: 14px; }
+  .tmpl-btn .tmpl-desc {
+    display: block;
+    font-size: 11px;
+    color: #64748b;
+    margin-top: 2px;
+    padding-left: 22px;
+  }
+
+  /* Main Content */
+  #main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+  }
+  #topbar {
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-shrink: 0;
+  }
+  #menu-btn {
+    background: none;
+    border: none;
+    font-size: 18px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    padding: 6px;
+    border-radius: 6px;
+    display: none;
+  }
+  #menu-btn:hover { background: var(--bg); }
+  .topbar-title { font-weight: 600; font-size: 14px; color: var(--text); }
+  .topbar-model {
+    margin-left: auto;
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  #model-select {
+    padding: 4px 8px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 13px;
+    background: var(--surface);
+    color: var(--text);
+  }
+  #status-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    display: inline-block;
+  }
+  #status-dot.online { background: var(--success); }
+  #status-dot.offline { background: #ef4444; }
+  #status-dot.loading { background: var(--warning); animation: pulse 1s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+  /* Chat Area */
+  #chat {
+    flex: 1;
+    overflow-y: auto;
+    padding: 20px 0;
+  }
+  .msg {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 16px 20px;
+    margin-bottom: 8px;
+  }
+  .msg.user { text-align: right; }
+  .msg.user .bubble {
+    background: var(--user-msg);
+    color: #fff;
+    border-radius: 18px 18px 4px 18px;
+    display: inline-block;
+    padding: 12px 18px;
+    max-width: 80%;
+    text-align: left;
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  .msg.assistant .bubble {
+    background: var(--ai-msg);
+    border-radius: 18px 18px 18px 4px;
+    display: inline-block;
+    padding: 12px 18px;
+    max-width: 85%;
+    font-size: 14px;
+    line-height: 1.6;
+    border: 1px solid var(--border);
+  }
+  .msg.assistant .bubble pre {
+    background: #0f172a;
+    color: #e2e8f0;
+    padding: 12px 16px;
+    border-radius: 8px;
+    overflow-x: auto;
+    font-size: 13px;
+    margin: 8px 0;
+    font-family: 'JetBrains Mono', 'SF Mono', monospace;
+  }
+  .msg.assistant .bubble code {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 13px;
+  }
+  .msg.assistant .bubble pre code { background: none; padding: 0; }
+  .msg.assistant .bubble ul, .msg.assistant .bubble ol { padding-left: 20px; margin: 8px 0; }
+  .msg.assistant .bubble p { margin: 8px 0; }
+  .msg.assistant .bubble p:first-child { margin-top: 0; }
+  .msg.assistant .bubble p:last-child { margin-bottom: 0; }
+  .msg.assistant .bubble h3 { margin: 12px 0 6px; font-size: 15px; }
+
+  .typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 8px 0;
+  }
+  .typing-indicator span {
+    width: 8px; height: 8px;
+    background: #94a3b8;
+    border-radius: 50%;
+    animation: bounce 1.4s infinite;
+  }
+  .typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+  .typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes bounce { 0%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-6px); } }
+
+  /* Input Area */
+  #input-area {
+    border-top: 1px solid var(--border);
+    padding: 16px 20px;
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+  #input-wrapper {
+    max-width: 720px;
+    margin: 0 auto;
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+  #chat-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    font-size: 14px;
+    outline: none;
+    resize: none;
+    font-family: inherit;
+    line-height: 1.5;
+    max-height: 120px;
+    background: var(--bg);
+    transition: border 0.15s;
+  }
+  #chat-input:focus { border-color: var(--primary); }
+  #send-btn {
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.15s;
+    flex-shrink: 0;
+  }
+  #send-btn:hover { background: var(--primary-hover); }
+  #send-btn:disabled { background: #94a3b8; cursor: not-allowed; }
+  #send-btn svg { width: 20px; height: 20px; fill: currentColor; }
+
+  .footer-info {
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-secondary);
+    padding: 8px 20px;
+    border-top: 1px solid var(--border);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  /* Welcome Screen */
+  #welcome {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 40px 20px;
+    text-align: center;
+  }
+  #welcome.hidden { display: none; }
+  #welcome .icon { font-size: 64px; margin-bottom: 16px; }
+  #welcome h1 { font-size: 24px; margin-bottom: 8px; color: var(--text); }
+  #welcome p { color: var(--text-secondary); max-width: 480px; line-height: 1.6; font-size: 14px; }
+  #welcome .suggestions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+    margin-top: 24px;
+    max-width: 520px;
+  }
+  #welcome .suggestion-btn {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 10px;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text);
+    transition: all 0.15s;
+    font-family: inherit;
+  }
+  #welcome .suggestion-btn:hover { border-color: var(--primary); color: var(--primary); background: #eff6ff; }
+
+  /* Loading overlay for first load */
+  #loading-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    z-index: 100;
+    transition: opacity 0.5s;
+  }
+  #loading-overlay.hidden { opacity: 0; pointer-events: none; }
+  .spinner {
+    width: 40px; height: 40px;
+    border: 4px solid var(--border);
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spinner-small {
+    display: inline-block;
+    width: 14px; height: 14px;
+    border: 2px solid #e2e8f0;
+    border-top-color: var(--primary);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    flex-shrink: 0;
+  }
+  #loading-overlay p { margin-top: 16px; color: var(--text-secondary); font-size: 14px; }
+
+  /* Mobile */
+  @media (max-width: 768px) {
+    #sidebar { position: absolute; left: 0; top: 0; bottom: 0; z-index: 50; }
+    #sidebar.hidden { transform: translateX(-280px); }
+    #menu-btn { display: block; }
+    .msg { padding: 12px 16px; }
+    .msg.user .bubble, .msg.assistant .bubble { max-width: 90%; font-size: 14px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- Loading Overlay -->
+<div id="loading-overlay">
+  <div class="spinner"></div>
+  <p>Memuatkan kacangje...</p>
+</div>
+
+<!-- Sidebar -->
+<div id="sidebar">
+  <div class="sidebar-header">
+    <h2><span>🇲🇾</span> kacangje</h2>
+    <button id="sidebar-toggle" onclick="toggleSidebar()" title="Tutup sidebar">✕</button>
+  </div>
+  <div style="flex:1; overflow-y:auto;">
+    <div class="template-section">
+      <h3>📋 Tugas SME</h3>
+      <div id="template-buttons"></div>
+    </div>
+    <div class="template-section">
+      <h3>⚡ Tindakan</h3>
+      <button class="tmpl-btn" onclick="newChat()">
+        <span class="tmpl-icon">➕</span> New Chat
+        <span class="tmpl-desc">Mulakan perbualan baru</span>
+      </button>
+      <button class="tmpl-btn" id="btn-open-webui" style="display:none;" onclick="openWebUI()">
+        <span class="tmpl-icon">🌐</span> Buka Open WebUI
+        <span class="tmpl-desc">Advanced chat interface (if installed)</span>
+      </button>
+    </div>
+  </div>
+  <div style="padding:12px 16px; border-top:1px solid #334155; font-size:11px; color:#64748b; text-align:center;">
+    v1.0 &middot; <a href="javascript:void(0)" onclick="checkUpdate()" style="color:#64748b;">semak update</a>
+  </div>
+</div>
+
+<!-- Main -->
+<div id="main">
+  <div id="topbar">
+    <button id="menu-btn" onclick="toggleSidebar()">☰</button>
+    <span class="topbar-title">🇲🇾 Pembantu SME</span>
+    <div class="topbar-model">
+      Model: <select id="model-select"></select>
+      <span id="status-dot" class="loading"></span>
+    </div>
+  </div>
+
+  <div id="chat">
+    <div id="welcome">
+      <div class="icon">🇲🇾</div>
+      <h1>Selamat datang ke kacangje</h1>
+      <p>AI pembantu pejabat untuk SME Malaysia. Guna Bahasa Malaysia atau Bahasa Inggeris. Tanya apa-apa tentang kerja harian pejabat.</p>
+      <div class="suggestions">
+        <button class="suggestion-btn" onclick="sendSuggestion('Kira gaji bulanan untuk 20 pekerja — OT, EPF, SOCSO')">💰 Kira gaji</button>
+        <button class="suggestion-btn" onclick="sendSuggestion('Buat template invoice untuk client')">📄 Template invoice</button>
+        <button class="suggestion-btn" onclick="sendSuggestion('Tulis email dalam BM untuk customer lewat bayar')">✉️ Email reminder</button>
+        <button class="suggestion-btn" onclick="sendSuggestion('Cara susun fail PDF ikut tarikh dalam folder')">📁 Susun fail</button>
+        <button class="suggestion-btn" onclick="sendSuggestion('Buat analisis data Excel — berapa profit margin kita?')">📊 Analisis Excel</button>
+        <button class="suggestion-btn" onclick="sendSuggestion('Tulis draft kontrak pekerja part-time')">📝 Kontrak pekerja</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="input-area">
+    <div id="input-wrapper">
+      <textarea id="chat-input" rows="1" placeholder="Taip soalan dalam BM atau English..." oninput="autoResize(this)" onkeydown="handleKey(event)"></textarea>
+      <button id="send-btn" onclick="sendMessage()" disabled>
+        <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
+      </button>
+    </div>
+  </div>
+  <div class="footer-info">
+    <span id="footer-model">menyambung...</span>
+  </div>
+</div>
+
+<script>
+// ── State ────────────────────────────────────────────────────
+let state = {
+  messages: [],
+  streaming: false,
+  abortController: null,
+  templates: [],
+  models: [],
+  currentModel: 'malaysian-7b-dialect',
+  ollamaRunning: false,
+};
+
+// ── DOM refs ──────────────────────────────────────────────────
+const chatEl = document.getElementById('chat');
+const welcomeEl = document.getElementById('welcome');
+const inputEl = document.getElementById('chat-input');
+const sendBtn = document.getElementById('send-btn');
+const statusDot = document.getElementById('status-dot');
+const modelSelect = document.getElementById('model-select');
+const footerModel = document.getElementById('footer-model');
+const loadingOverlay = document.getElementById('loading-overlay');
+const templateBtns = document.getElementById('template-buttons');
+
+// ── Init ──────────────────────────────────────────────────────
+async function init() {
+  await Promise.all([fetchStatus(), fetchTemplates()]);
+  loadingOverlay.classList.add('hidden');
+  inputEl.focus();
+}
+
+async function fetchStatus() {
+  try {
+    const resp = await fetch('/api/status');
+    const data = await resp.json();
+    state.ollamaRunning = data.ollama;
+    state.models = data.models || [];
+    state.templates = data.templates || [];
+
+    // Update model select
+    modelSelect.innerHTML = '';
+    if (state.models.length === 0) {
+      modelSelect.innerHTML = '<option>—tiada model—</option>';
+      statusDot.className = 'offline';
+      footerModel.textContent = '❌ Ollama tidak jalan | kacangje SME v1.0';
+      return;
+    }
+    statusDot.className = 'online';
+    const preferred = ['qwen2.5:7b-instruct', 'malaysian-7b-dialect', 'qwen3:4b', 'malaysian-1.5b-reasoning'];
+    for (const m of state.models) {
+      const opt = document.createElement('option');
+      opt.value = m;
+      const label = m.includes('7b') ? `${m} ⭐` : m;
+      opt.textContent = label;
+      modelSelect.appendChild(opt);
+    }
+    // Select preferred model
+    for (const p of preferred) {
+      if (state.models.some(m => m.includes(p))) {
+        const match = state.models.find(m => m.includes(p));
+        modelSelect.value = match;
+        state.currentModel = match;
+        break;
+      }
+    }
+    state.currentModel = modelSelect.value;
+    footerModel.textContent = `✓ ${state.currentModel} | kacangje SME v1.0 | ${data.system.ram_gb || '?'}GB RAM`;
+
+    // Show Open WebUI button if it's installed
+    if (state.models.some(m => m.includes('malaysian'))) {
+      // Check if Open WebUI is running
+      fetch('http://127.0.0.1:3000/', {mode: 'no-cors'}).then(() => {
+        document.getElementById('btn-open-webui').style.display = 'block';
+      }).catch(() => {});
+    }
+
+    renderTemplates();
+  } catch (e) {
+    statusDot.className = 'offline';
+    footerModel.textContent = '❌ Gagal sambung | kacangje SME v1.0';
+  }
+}
+
+async function fetchTemplates() {
+  try {
+    const resp = await fetch('/api/templates');
+    state.templates = await resp.json();
+    renderTemplates();
+  } catch (e) {}
+}
+
+function renderTemplates() {
+  templateBtns.innerHTML = '';
+  for (const t of state.templates) {
+    const btn = document.createElement('button');
+    btn.className = 'tmpl-btn';
+    btn.innerHTML = `<span class="tmpl-icon">${t.icon || '📋'}</span> ${t.title}
+      <span class="tmpl-desc">${t.description || ''}</span>`;
+    btn.onclick = () => sendTemplate(t);
+    templateBtns.appendChild(btn);
+  }
+}
+
+// ── Sidebar ──────────────────────────────────────────────────
+function toggleSidebar() {
+  document.getElementById('sidebar').classList.toggle('hidden');
+}
+
+// ── Chat ─────────────────────────────────────────────────────
+function addMessage(role, content) {
+  welcomeEl.classList.add('hidden');
+  const msgDiv = document.createElement('div');
+  msgDiv.className = `msg ${role}`;
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  if (role === 'assistant' && content === '...') {
+    bubble.innerHTML = '<div class="typing-indicator"><span></span><span></span><span></span></div>';
+  } else {
+    bubble.innerHTML = formatContent(content);
+  }
+  msgDiv.appendChild(bubble);
+  chatEl.appendChild(msgDiv);
+  chatEl.scrollTop = chatEl.scrollHeight;
+  return msgDiv;
+}
+
+function updateLastMessage(content) {
+  const msgs = chatEl.querySelectorAll('.msg.assistant');
+  if (msgs.length === 0) return;
+  const last = msgs[msgs.length - 1];
+  const bubble = last.querySelector('.bubble');
+  if (bubble) bubble.innerHTML = formatContent(content);
+  chatEl.scrollTop = chatEl.scrollHeight;
+}
+
+function formatContent(text) {
+  if (!text) return '';
+  // Escape HTML
+  text = text.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+  // Code blocks
+  text = text.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  // Inline code
+  text = text.replace(/`([^`]+)`/g, '<code>$1</code>');
+  // Bold
+  text = text.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  // Lists
+  text = text.replace(/^- (.+)$/gm, '<li>$1</li>');
+  text = text.replace(/(<li>.*<\/li>\n?)+/g, '<ul>$&</ul>');
+  // Numbered lists
+  text = text.replace(/^\d+\. (.+)$/gm, '<li>$1</li>');
+  // Paragraphs (double newlines)
+  text = text.split('\n\n').map(p => {
+    p = p.trim();
+    if (!p) return '';
+    if (p.startsWith('<')) return p;
+    return `<p>${p.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+  return text;
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+}
+
+function sendSuggestion(text) {
+  inputEl.value = text;
+  sendMessage();
+}
+
+async function sendTemplate(tmpl) {
+  inputEl.value = tmpl.prompt;
+  sendMessage();
+}
+
+async function sendMessage() {
+  const text = inputEl.value.trim();
+  if (!text || state.streaming) return;
+
+  inputEl.value = '';
+  inputEl.style.height = 'auto';
+  state.messages.push({role: 'user', content: text});
+  addMessage('user', text);
+  sendBtn.disabled = true;
+
+  // Show typing indicator
+  addMessage('assistant', '...');
+  state.streaming = true;
+
+  const model = modelSelect.value || state.currentModel;
+
+  try {
+    const resp = await fetch('/api/chat', {
+      method: 'POST',
+      headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify({
+        model: model,
+        messages: [{role: 'user', content: text}],
+        stream: true,
+      }),
+    });
+
+    const reader = resp.body.getReader();
+    const decoder = new TextDecoder();
+    let fullResponse = '';
+
+    while (true) {
+      const {done, value} = await reader.read();
+      if (done) break;
+
+      const chunk = decoder.decode(value, {stream: true});
+      const lines = chunk.split('\n').filter(l => l.startsWith('data: '));
+
+      for (const line of lines) {
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          if (parsed.tool) {
+            // Tool usage indicator — replace typing dots with tool icon
+            updateLastMessage(`<div style="display:flex;align-items:center;gap:8px;color:#64748b;font-size:13px;"><span class="spinner-small"></span> ${parsed.tool}</div>`);
+            continue;
+          }
+          if (parsed.content) {
+            fullResponse += parsed.content;
+            updateLastMessage(fullResponse);
+          }
+          if (parsed.done) {
+            const tokPerSec = parsed.eval_count && parsed.eval_duration
+              ? (parsed.eval_count / (parsed.eval_duration / 1e9)).toFixed(1)
+              : '?';
+            fullResponse += `\n\n<small style="color:#94a3b8;font-size:11px;">⚡ ${tokPerSec} tok/s · ${parsed.eval_count || '?'} tokens</small>`;
+            updateLastMessage(fullResponse);
+          }
+          if (parsed.error) {
+            fullResponse += `\n\n<small style="color:#ef4444;">Error: ${parsed.error}</small>`;
+            updateLastMessage(fullResponse);
+          }
+        } catch (e) {}
+      }
+    }
+
+    state.messages.push({role: 'assistant', content: fullResponse});
+  } catch (e) {
+    updateLastMessage(`<small style="color:#ef4444;">Ralat: ${e.message}. Cuba refresh halaman.</small>`);
+  }
+
+  state.streaming = false;
+  sendBtn.disabled = false;
+  inputEl.focus();
+}
+
+function newChat() {
+  state.messages = [];
+  chatEl.querySelectorAll('.msg').forEach(el => el.remove());
+  welcomeEl.classList.remove('hidden');
+  if (window.innerWidth <= 768) toggleSidebar();
+  inputEl.focus();
+}
+
+function openWebUI() {
+  window.open('http://127.0.0.1:3000/', '_blank');
+}
+
+// ── Update check ──────────────────────────────────────────────
+function checkUpdate() {
+  const el = document.querySelector('.sidebar-header h2');
+  const orig = el.innerHTML;
+  el.innerHTML = '<span>🇲🇾</span> kacangje <small style="font-size:11px;color:#94a3b8;">✓ latest</small>';
+  setTimeout(() => el.innerHTML = orig, 2000);
+}
+
+// ── Input enable/disable ──────────────────────────────────────
+inputEl.addEventListener('input', () => {
+  sendBtn.disabled = !inputEl.value.trim() || state.streaming;
+});
+
+// ── Init on load ──────────────────────────────────────────────
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>

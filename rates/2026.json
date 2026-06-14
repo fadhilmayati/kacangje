@@ -1,0 +1,56 @@
+{
+  "year": 2026,
+  "effective_from": "2026-01-01",
+  "currency": "MYR",
+  "disclaimer": "Anggaran sahaja. Sahkan dengan KWSP, PERKESO, dan LHDN sebelum pemfailan rasmi. Estimates only — verify with official bodies before any statutory filing.",
+  "minimum_wage": {
+    "monthly": 1700,
+    "effective_from": "2025-08-01",
+    "note": "RM1,700 sebulan untuk semua majikan (penuh sejak 1 Ogos 2025).",
+    "source": "Perintah Gaji Minimum 2024; employsome.com/blog/minimum-wage-malaysia"
+  },
+  "epf": {
+    "employee_rate_pct": 11.0,
+    "employer_rate_pct_below_5000": 13.0,
+    "employer_rate_pct_above_5000": 12.0,
+    "wage_threshold": 5000,
+    "note": "Pekerja: 11% tetap. Majikan: 13% jika gaji <= RM5,000, 12% jika > RM5,000.",
+    "source": "KWSP / EPF 2026; ajobthing.com EPF SOCSO EIS 2026"
+  },
+  "socso": {
+    "employee_rate_pct": 0.5,
+    "employer_rate_pct": 1.75,
+    "wage_ceiling": 6000,
+    "note": "Siling gaji RM6,000 sejak Oktober 2024. Anggaran peratusan; PERKESO guna jadual sebenar mengikut tangga gaji.",
+    "source": "PERKESO 2026; malaysiasalarycalculator.com/socso-contribution-table"
+  },
+  "eis": {
+    "employee_rate_pct": 0.2,
+    "employer_rate_pct": 0.2,
+    "wage_ceiling": 6000,
+    "note": "Pekerja dan majikan masing-masing 0.2%, siling RM6,000.",
+    "source": "PERKESO EIS 2026"
+  },
+  "pcb": {
+    "note": "PCB sebenar bergantung kepada status perkahwinan, bilangan tanggungan, dan pelepasan cukai. Angka di sini hanya anggaran kasar — guna kalkulator PCB rasmi LHDN untuk angka tepat.",
+    "rough_estimate_pct": 3.0,
+    "estimate_threshold": 3000,
+    "source": "LHDN — anggaran kasar sahaja"
+  },
+  "sst": {
+    "service_tax_pct": 8.0,
+    "sales_tax_pct": 10.0,
+    "common_invoice_default_pct": 8.0,
+    "note": "Cukai Perkhidmatan 8% (sesetengah perkhidmatan 6%). Cukai Jualan 5% atau 10% ikut barang. Default invois guna 8% — laras ikut jenis bisnes.",
+    "source": "LHDN/Kastam SST 2026"
+  },
+  "einvoice": {
+    "exemption_turnover_below": 1000000,
+    "phase4_turnover_range": [1000000, 5000000],
+    "phase4_start": "2026-01-01",
+    "relaxation_until": "2027-12-31",
+    "individual_einvoice_threshold": 10000,
+    "note": "Bisnes < RM1 juta dikecualikan. Fasa 4 (RM1-5 juta) mula 1 Jan 2026 dengan tempoh pelonggaran tanpa penalti hingga 31 Dis 2027. Transaksi > RM10,000 perlu e-invois individu.",
+    "source": "LHDN MyInvois; cleartax.com/my e-invoicing 2026"
+  }
+}

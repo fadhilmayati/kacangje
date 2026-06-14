@@ -1,0 +1,74 @@
+{
+  "actions": [
+    {
+      "id": "gaji",
+      "file": "gaji.py",
+      "title": "Kira Gaji",
+      "description": "Kira payroll bulanan termasuk EPF, SOCSO, EIS, PCB, OT",
+      "icon": "💰",
+      "params": {
+        "workers": {"type": "int", "default": 1, "description": "Bilangan pekerja"},
+        "gaji_pokok": {"type": "float", "default": 1500, "description": "Gaji pokok seorang"},
+        "ot_hours": {"type": "float", "default": 0, "description": "Jumlah jam OT"},
+        "ot_rate": {"type": "float", "default": 1.5, "description": "Kadar OT (1.5 = biasa)"},
+        "elaun": {"type": "float", "default": 0, "description": "Elaun tambahan"},
+        "potongan_lain": {"type": "float", "default": 0, "description": "Potongan lain"}
+      }
+    },
+    {
+      "id": "susun-fail",
+      "file": "susun-fail.py",
+      "title": "Susun Fail",
+      "description": "Organize fail dalam folder ikut tarikh, jenis, atau saiz",
+      "icon": "📁",
+      "params": {
+        "folder": {"type": "string", "default": "~/Downloads", "description": "Folder nak disusun"},
+        "by": {"type": "choice", "options": ["date", "type", "size"], "default": "date", "description": "Susun ikut"},
+        "dry_run": {"type": "bool", "default": true, "description": "Preview dulu tanpa pindah fail"}
+      }
+    },
+    {
+      "id": "invoice",
+      "file": "invoice.py",
+      "title": "Buat Invoice",
+      "description": "Generate invoice dalam format HTML (siap print)",
+      "icon": "📄",
+      "params": {
+        "client": {"type": "string", "default": "Pelanggan", "description": "Nama client"},
+        "company": {"type": "string", "default": "Syarikat Anda", "description": "Nama syarikat"},
+        "items": {"type": "list", "default": [["Servis", 1, 100]], "description": "Senarai item [nama, qty, harga]"},
+        "tax_rate": {"type": "float", "default": 6, "description": "Kadar SST (%)"},
+        "discount": {"type": "float", "default": 0, "description": "Diskaun (RM)"}
+      }
+    },
+    {
+      "id": "quotation",
+      "file": "quotation.py",
+      "title": "Sebut Harga",
+      "description": "Generate sebut harga (quotation) dalam format HTML siap print",
+      "icon": "📝",
+      "params": {
+        "client": {"type": "string", "default": "Pelanggan", "description": "Nama client"},
+        "company": {"type": "string", "default": "", "description": "Nama syarikat (auto dari profile)"},
+        "items": {"type": "list", "default": [["Servis", 1, 100]], "description": "Senarai item [nama, qty, harga]"},
+        "tax_rate": {"type": "float", "default": 8, "description": "Kadar SST (%)"},
+        "discount": {"type": "float", "default": 0, "description": "Diskaun (RM)"},
+        "valid_days": {"type": "int", "default": 30, "description": "Tempoh sah (hari)"},
+        "notes": {"type": "string", "default": "", "description": "Nota tambahan"}
+      }
+    },
+    {
+      "id": "excel-analisis",
+      "file": "excel-analisis.py",
+      "title": "Analisis Excel",
+      "description": "Baca fail CSV dan buat analisis data asas",
+      "icon": "📊",
+      "params": {
+        "file": {"type": "string", "default": "", "description": "Path ke fail CSV"},
+        "analysis": {"type": "choice", "options": ["summary", "profit", "trend", "top"], "default": "summary", "description": "Jenis analisis"},
+        "column": {"type": "string", "default": "", "description": "Kolom untuk analisis (untuk 'profit' atau 'top')"},
+        "top_n": {"type": "int", "default": 5, "description": "Bilangan top (untuk 'top')"}
+      }
+    }
+  ]
+}

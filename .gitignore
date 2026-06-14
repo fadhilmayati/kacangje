@@ -1,0 +1,24 @@
+# Models are pulled via Ollama — never commit weights
+models/
+*.gguf
+*.bin
+*.safetensors
+
+# Build tooling (not part of the package)
+llama.cpp-repo/
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+venv/
+
+# OS / editor
+.DS_Store
+*.swp
+.idea/
+.vscode/
+
+# User-local runtime data (keep seed templates, ignore real edits if desired)
+# brain/memory.jsonl   # uncomment if you don't want to ship example memory
