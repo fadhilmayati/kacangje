@@ -238,11 +238,12 @@ class KacangjeHandler(http.server.BaseHTTPRequestHandler):
                     return
 
                 # Otherwise, stream LLM response
+                from lib.tools import GEN_OPTIONS
                 payload = {
                     "model": model,
                     "messages": result.get("messages", []),
                     "stream": True,
-                    "options": {"temperature": 0.3},
+                    "options": GEN_OPTIONS,
                 }
 
                 req = urllib.request.Request(

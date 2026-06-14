@@ -58,5 +58,8 @@ jobs:
           print("rates OK")
           PY
 
+      - name: Regression tests (payroll/rates trust layer)
+        run: python3 -m unittest discover -s tests -p 'test_*.py' -v
+
       - name: make check
         run: make check || true   # Ollama isn't present in CI; don't fail the gate on it

@@ -108,7 +108,8 @@ Keep this list fed; the agent does one item/day. Current seed (from strategy):
 - [ ] Payslip PDF export from `gaji` (a clear Pro feature).
 - [ ] MyInvois skill: generate compliant fields, validate TIN.
 - [ ] Input validation + error messages across actions (hardening).
-- [ ] Test coverage for `gaji` rate math against known-good fixtures.
+- [x] Test coverage for `gaji` rate math against known-good fixtures. (`tests/test_gaji.py`,
+      gated in CI — includes a rate-guard that fails if `rates/` changes without updating fixtures.)
 - [ ] GUI installer (.dmg/.exe) bundling Ollama + model.
 
 ---

@@ -73,8 +73,9 @@ def chat_ollama(model, messages, extra_skill=None):
             messages[0]["content"] += f"\n\n[SKILL: {extra_skill['name']}]\n{extra_skill['instructions']}"
         else:
             messages.insert(0, {"role": "system", "content": extra_skill["instructions"]})
+    from lib.tools import GEN_OPTIONS
     payload = {"model": model, "messages": messages, "stream": True,
-               "options": {"temperature": 0.3}}
+               "options": GEN_OPTIONS}
     try:
         req = urllib.request.Request(
             f"{OLLAMA_HOST}/api/chat",

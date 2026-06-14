@@ -152,8 +152,12 @@ TEMPLATE """{{ if .System }}<|im_start|>system
 {{ .Prompt }}<|im_end|>
 <|im_start|>assistant
 """
-PARAMETER temperature 0.3
+PARAMETER temperature 0.2
+PARAMETER top_p 0.9
+PARAMETER repeat_penalty 1.1
+PARAMETER num_predict 640
 PARAMETER num_ctx 32768
+PARAMETER stop "<|im_start|>"
 EOF
       ollama create "$model" -f /tmp/Modelfile-kacangje
       ok "Model $model diimport dari GGUF"
@@ -297,17 +301,15 @@ cmd_prompt() {
   echo ""
 
   # Build a system prompt that tells the AI to act as an agentic assistant
-  local system_prompt="Anda adalah pembantu AI pejabat untuk SME Malaysia. 
-Tugas anda: dengar arahan pengguna, dan bantu selesaikan kerja pejabat harian.
-Anda boleh:
-- Tulis skrip Python/bash untuk automasi (susun fail, proses Excel, generate dokumen)
-- Buat template untuk invoice, kontrak, surat
-- Kira gaji, cukai, dan analisis data
-- Tulis email, laporan, dan dokumen dalam BM
+  local system_prompt="Anda kacangje — pembantu AI pejabat untuk SME Malaysia. Tepat, ringkas, tajam.
+Tugas: bantu kerja pejabat harian (automasi, dokumen, invois, gaji/cukai, analisis data, emel/surat BM).
 
-BERTINDAK: jangan cakap apa anda akan buat — terus buat. 
-GUNA BAHASA MALAYSIA: campur Inggeris jika perlu.
-RINGKAS: bagi jawapan direct, boleh guna terus."
+CARA JAWAB (ikut betul-betul):
+- RINGKAS & TAJAM. Terus buat / terus jawab — jangan mukadimah, jangan ulang soalan, jangan ayat pengisi.
+- SPESIFIK. Jawab apa yang diminta sahaja; jangan tambah yang tak diminta.
+- Bahasa Malaysia (campur English bila perlu).
+- JANGAN REKA nombor, kadar, tarikh, atau undang-undang. Tak pasti — kata tak pasti, cadang semak KWSP/PERKESO/LHDN.
+- Berhenti bila dah siap."
 
   # Use ollama's chat API with system prompt
   local full_prompt="<|im_start|>system

@@ -581,17 +581,35 @@ def process_query(user_query: str) -> dict:
 
 # ── System Prompt ─────────────────────────────────────────────
 
-SYSTEM_PROMPT = """Anda adalah pembantu AI pejabat untuk SME Malaysia.
+# Generation options tuned for sharp, concise, low-drift answers on SMALL local
+# models (1.5B–7B). Low temperature + repeat_penalty curb drift and rambling;
+# num_predict hard-caps verbosity; the stop list keeps small models from leaking
+# extra turns / role markers (a common failure mode). Callers (repl, web server)
+# import this so the behavior is identical everywhere. Tunable, but keep it tight —
+# conciseness is a product promise, not a preference.
+GEN_OPTIONS = {
+    "temperature": 0.2,
+    "top_p": 0.9,
+    "repeat_penalty": 1.1,
+    "num_predict": 640,
+    "stop": ["<|im_start|>", "<|im_end|>", "\nPengguna:", "\nUser:"],
+}
 
-TUGAS ANDA:
-- Menjawab soalan umum dan perbualan biasa
-- Menulis email, surat, dokumen dalam BM
-- Membantu dengan tugas pejabat harian
 
-PANDUAN:
-1. Jawab dalam Bahasa Malaysia. Campur Inggeris jika perlu.
-2. RINGKAS dan tepat.
-3. Bersikap membantu dan mesra."""
+SYSTEM_PROMPT = """Anda kacangje — pembantu AI pejabat untuk SME Malaysia. Tepat, ringkas, tajam.
+
+TUGAS:
+- Jawab soalan & bantu kerja pejabat harian.
+- Tulis emel, surat, dokumen dalam Bahasa Malaysia.
+
+CARA JAWAB (PENTING — ikut betul-betul):
+1. RINGKAS. Terus ke jawapan. Jangan mukadimah, jangan ulang soalan, jangan ayat pengisi.
+2. TAJAM & SPESIFIK. Jawab apa yang ditanya sahaja — jangan tambah maklumat yang tak diminta.
+3. Bahasa Malaysia (campur English bila perlu). Nada profesional & mesra, tapi tak meleret.
+4. JANGAN REKA nombor, kadar, tarikh, atau undang-undang. Kalau tak pasti — kata tak pasti dan cadang semak sumber rasmi (KWSP/PERKESO/LHDN). Lebih baik mengaku tak tahu daripada menipu.
+5. Guna MAKLUMAT RUJUKAN TEMPATAN di bawah jika ada; jangan bertentangan dengannya.
+6. Soalan kabur? Tanya SATU soalan penjelas — jangan teka panjang-lebar.
+7. Berhenti bila dah jawab. Jangan tawar bantuan tambahan melainkan diminta."""
 
 
 def build_messages(user_query: str) -> dict:
