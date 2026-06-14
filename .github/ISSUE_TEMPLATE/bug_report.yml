@@ -1,0 +1,39 @@
+name: 🐞 Bug report
+description: Laporkan sesuatu yang tak jalan / Report something broken
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Terima kasih lapor bug! Untuk **idea / cadangan**, guna tab **Discussions → Idea**.
+  - type: textarea
+    id: what
+    attributes:
+      label: Apa yang berlaku? · What happened?
+      description: Apa yang anda buat, apa yang anda jangka, apa yang berlaku sebenarnya.
+      placeholder: "Saya taip `kacangje action gaji ...` dan ..."
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Langkah untuk ulang · Steps to reproduce
+      placeholder: |
+        1. ...
+        2. ...
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Model & RAM
+      description: Model Ollama yang diguna + RAM laptop (cth. malaysian-7b-dialect, 16GB)
+    validations:
+      required: false
+  - type: input
+    id: os
+    attributes:
+      label: OS
+      placeholder: "macOS 26 / Windows 11 / Ubuntu 24.04"
+    validations:
+      required: false

@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: 💬 Forum / Soalan / Idea (Discussions)
+    url: https://github.com/fadhilmayati/kacangje/discussions
+    about: Soalan, idea, "macam mana nak...", kongsi skill — mula di Discussions, bukan Issues.
+  - name: 🔒 Isu keselamatan · Security issue
+    url: https://github.com/fadhilmayati/kacangje/security/advisories/new
+    about: Jangan buka isu awam untuk masalah keselamatan — guna private advisory.

@@ -1,0 +1,19 @@
+# Default owner for everything.
+*                       @fadhilmayati
+
+# Trust-critical paths — ALWAYS require human maintainer review, never bot auto-merge.
+# Payroll/tax math and statutory rates: numbers people rely on.
+/actions/gaji.py        @fadhilmayati
+/actions/invoice.py     @fadhilmayati
+/actions/quotation.py   @fadhilmayati
+/rates/                 @fadhilmayati
+
+# Install + CLI contract — breaking these breaks the "one install away" promise.
+/install.sh             @fadhilmayati
+/kacangje               @fadhilmayati
+/Makefile               @fadhilmayati
+
+# Governance / safety docs.
+/MAINTENANCE.md         @fadhilmayati
+/LICENSE                @fadhilmayati
+/.github/               @fadhilmayati
