@@ -19,7 +19,23 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 # ── Paths ──────────────────────────────────────────────────────
-KACANGJE_DIR="${KACANGJE_DIR:-$HOME/kacangje}"
+# Resolve our real location, following symlinks, so kacangje works whether it's
+# run from a git clone, from $HOME/kacangje, or via a symlink on PATH (e.g. in
+# /opt/homebrew/bin). An explicit KACANGJE_DIR env var always wins.
+_src="${BASH_SOURCE[0]:-$0}"
+while [[ -h "$_src" ]]; do
+  _dir="$(cd -P "$(dirname "$_src")" && pwd)"
+  _src="$(readlink "$_src")"
+  [[ "$_src" != /* ]] && _src="$_dir/$_src"
+done
+_self_dir="$(cd -P "$(dirname "$_src")" && pwd)"
+if [[ -z "${KACANGJE_DIR:-}" ]]; then
+  if [[ -f "$_self_dir/web/server.py" ]]; then
+    KACANGJE_DIR="$_self_dir"      # running from a checkout/install that has the files
+  else
+    KACANGJE_DIR="$HOME/kacangje"  # symlinked onto PATH; files live in the home install
+  fi
+fi
 CONFIG_DIR="$HOME/.config/kacangje"
 CONFIG_FILE="$CONFIG_DIR/kacangje.conf"
 
@@ -212,7 +228,7 @@ cmd_web() {
   fi
 
   cd "$KACANGJE_DIR"
-  KACANGJE_DIR="$KACANGJE_DIR" KACANGJE_PORT="$port" python3 web/server.py
+  KACANGJE_DIR="$KACANGJE_DIR" KACANGJE_PORT="$port" python3 "$KACANGJE_DIR/web/server.py"
 }
 
 cmd_action() {

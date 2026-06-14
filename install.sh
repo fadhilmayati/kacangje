@@ -110,38 +110,52 @@ ok "Ollama running"
 # ── Step 3: Install kacangje files ────────────────────────────────
 echo ""
 info "Memasang kacangje CLI dan tools..."
-mkdir -p "$INSTALL_DIR"/{web,templates,actions,config,models,lib,rates,brain,skills}
 
-# Download files from GitHub (or copy from local)
-# For now, we'll set up from the local directory if it exists
-if [[ -d "$INSTALL_DIR/web" ]] && [[ -f "$INSTALL_DIR/web/server.py" ]]; then
-  ok "kacangje files sudah ada di $INSTALL_DIR"
+# Find a source for the program files, in priority order:
+#   1. A local checkout (installer sits next to the app files) — copy from there.
+#   2. git clone from GitHub.
+#   3. Tarball download from GitHub.
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" 2>/dev/null && pwd || echo "")"
+SRC=""
+CLEANUP_TMP=""
+
+if [[ -n "$SCRIPT_DIR" && -f "$SCRIPT_DIR/kacangje" && -f "$SCRIPT_DIR/web/server.py" ]]; then
+  SRC="$SCRIPT_DIR"
+  info "Memasang dari salinan tempatan: $SRC"
 else
-  info "Memuat turun kacangje files (coming from GitHub)..."
-  warn "Untuk sekarang, clone repo dulu:"
-  warn "  git clone https://github.com/fadhilmayati/kacangje.git $INSTALL_DIR"
-  warn "Atau setup manual."
-
-  # Try to find local files
-  SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-  if [[ -f "$SCRIPT_DIR/kacangje" ]]; then
-    info "Jumpa local kacangje files, copy..."
-    cp "$SCRIPT_DIR/kacangje" "$INSTALL_DIR/kacangje"
-    chmod +x "$INSTALL_DIR/kacangje"
-    cp -r "$SCRIPT_DIR/web" "$INSTALL_DIR/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR/templates" "$INSTALL_DIR/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR/actions" "$INSTALL_DIR/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR/config" "$INSTALL_DIR/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR/lib" "$INSTALL_DIR/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR/rates" "$INSTALL_DIR/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR/brain" "$INSTALL_DIR/" 2>/dev/null || true
-    cp -r "$SCRIPT_DIR/skills" "$INSTALL_DIR/" 2>/dev/null || true
-    ok "Files copied"
+  TMP="$(mktemp -d)"; CLEANUP_TMP="$TMP"
+  if command -v git &>/dev/null && git clone --depth 1 "${REPO}.git" "$TMP/kacangje" >/dev/null 2>&1; then
+    SRC="$TMP/kacangje"
+    info "Dimuat turun dari GitHub (git)"
+  elif curl -fsSL "${REPO}/archive/refs/heads/main.tar.gz" -o "$TMP/k.tgz" 2>/dev/null \
+       && tar -xzf "$TMP/k.tgz" -C "$TMP" 2>/dev/null; then
+    SRC="$(find "$TMP" -maxdepth 1 -type d -name 'kacangje*' | head -1)"
+    info "Dimuat turun dari GitHub (tarball)"
   fi
 fi
 
-# Make CLI executable
-chmod +x "$INSTALL_DIR/kacangje" 2>/dev/null || true
+if [[ -z "$SRC" || ! -f "$SRC/kacangje" ]]; then
+  fail "Gagal memuat turun kacangje. Cuba manual: git clone ${REPO}.git $INSTALL_DIR"
+fi
+
+# Copy program files. PRESERVE user data: never clobber an existing brain/ (memory,
+# profile) or the user's models/.
+mkdir -p "$INSTALL_DIR"
+cp "$SRC/kacangje" "$INSTALL_DIR/kacangje"
+chmod +x "$INSTALL_DIR/kacangje"
+for d in web templates actions config lib rates skills; do
+  mkdir -p "$INSTALL_DIR/$d"
+  cp -R "$SRC/$d/." "$INSTALL_DIR/$d/" 2>/dev/null || true
+done
+mkdir -p "$INSTALL_DIR/models"
+if [[ ! -f "$INSTALL_DIR/brain/profile.json" ]]; then
+  mkdir -p "$INSTALL_DIR/brain"
+  cp -R "$SRC/brain/." "$INSTALL_DIR/brain/" 2>/dev/null || true
+else
+  ok "brain/ sedia ada — data anda dikekalkan"
+fi
+[[ -n "$CLEANUP_TMP" ]] && rm -rf "$CLEANUP_TMP"
+ok "kacangje files dipasang ke $INSTALL_DIR"
 
 # ── Step 4: Pull Model ──────────────────────────────────────────
 echo ""
@@ -170,28 +184,50 @@ else
   fi
 fi
 
-# ── Step 5: Add to PATH ─────────────────────────────────────────
-SHELL_RC=""
-if [[ -n "${ZSH_VERSION:-}" ]] || [[ "$SHELL" == *"zsh"* ]]; then
-  SHELL_RC="$HOME/.zshrc"
-elif [[ -n "${BASH_VERSION:-}" ]] || [[ "$SHELL" == *"bash"* ]]; then
-  SHELL_RC="$HOME/.bashrc"
-fi
+# ── Step 5: Make `kacangje` runnable ────────────────────────────
+echo ""
+info "Menyediakan arahan 'kacangje'..."
 
-if [[ -n "$SHELL_RC" ]] && ! grep -q "kacangje" "$SHELL_RC" 2>/dev/null; then
+# Best path: symlink into a directory ALREADY on PATH and writable. This makes
+# `kacangje` work in the current shell AND new ones, with no `source` needed.
+LINKED=""
+for d in /opt/homebrew/bin /usr/local/bin "$HOME/.local/bin"; do
+  if [[ -d "$d" && -w "$d" ]]; then
+    if ln -sf "$INSTALL_DIR/kacangje" "$d/kacangje" 2>/dev/null; then
+      LINKED="$d/kacangje"
+      ok "Arahan 'kacangje' dipasang: $LINKED"
+      break
+    fi
+  fi
+done
+
+# Fallback / belt-and-suspenders: also add to the shell rc so it survives and
+# works even if no writable PATH dir was found.
+SHELL_RC=""
+case "$(basename "${SHELL:-}")" in
+  zsh)  SHELL_RC="$HOME/.zshrc" ;;
+  bash) SHELL_RC="$HOME/.bashrc" ;;
+  *)    [[ "$OS" == "Darwin" ]] && SHELL_RC="$HOME/.zshrc" || SHELL_RC="$HOME/.bashrc" ;;
+esac
+
+if [[ -n "$SHELL_RC" ]] && ! grep -q "kacangje - Malaysian" "$SHELL_RC" 2>/dev/null; then
   {
     echo ""
     echo "# 🇲🇾 kacangje - Malaysian AI SME Assistant"
     echo "export PATH=\"\$PATH:$INSTALL_DIR\""
     echo "export KACANGJE_DIR=\"$INSTALL_DIR\""
   } >> "$SHELL_RC"
-  ok "Ditambah ke PATH dalam $SHELL_RC"
-  ok "Jalan: source $SHELL_RC"
+  ok "Ditambah ke PATH dalam $(basename "$SHELL_RC")"
 fi
 
-# Export for current session
+# Export for the rest of this installer session.
 export PATH="$PATH:$INSTALL_DIR"
 export KACANGJE_DIR="$INSTALL_DIR"
+
+# If we couldn't symlink onto an active PATH dir, the user needs a new shell.
+if [[ -z "$LINKED" ]]; then
+  NEEDS_RELOAD=1
+fi
 
 # ── Step 6: Config ──────────────────────────────────────────────
 mkdir -p "$HOME/.config/kacangje"
@@ -225,5 +261,8 @@ echo -e "  ${GREEN}4.${NC} Tengok template:"
 echo -e "     ${BLUE}\$ kacangje templates${NC}"
 echo ""
 echo -e "  ${YELLOW}💡 Tip:${NC} Semua jalan offline. Tak perlukan internet lepas install."
-echo -e "  ${YELLOW}💡 Tip:${NC} Nak buka web UI sekarang? Jalan: kacangje web"
 echo ""
+if [[ "${NEEDS_RELOAD:-0}" == "1" ]]; then
+  echo -e "  ${YELLOW}⚠ Buka terminal baru${NC} (atau jalan: ${BLUE}source $SHELL_RC${NC}) supaya arahan 'kacangje' aktif."
+  echo ""
+fi
