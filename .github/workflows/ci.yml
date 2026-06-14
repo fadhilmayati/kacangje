@@ -1,0 +1,62 @@
+name: CI (test gate)
+
+# Runs on PRs and pushes. Uses `pull_request` (NOT pull_request_target) so forked-PR
+# code never gets access to repo secrets — safe for an open contributor repo.
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test-gate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Lint bash (syntax)
+        run: |
+          bash -n kacangje
+          bash -n install.sh
+
+      - name: Compile Python (syntax)
+        run: |
+          python3 -m py_compile $(git ls-files '*.py')
+
+      - name: Validate rates JSON + require sources
+        run: |
+          python3 - <<'PY'
+          import json, glob, sys
+          bad = []
+          for f in glob.glob("rates/*.json"):
+              data = json.load(open(f))
+              # every rate entry that carries a value should cite a source + effective date
+              def walk(obj, path):
+                  if isinstance(obj, dict):
+                      if "value" in obj or "rate" in obj:
+                          if not obj.get("source"):
+                              bad.append(f"{f}:{path} missing 'source'")
+                          if not obj.get("effective"):
+                              bad.append(f"{f}:{path} missing 'effective'")
+                      for k, v in obj.items():
+                          walk(v, f"{path}.{k}")
+                  elif isinstance(obj, list):
+                      for i, v in enumerate(obj):
+                          walk(v, f"{path}[{i}]")
+              walk(data, f.rsplit('/',1)[-1])
+          if bad:
+              print("Rate entries missing official source/effective date:")
+              print("\n".join(bad))
+              sys.exit(1)
+          print("rates OK")
+          PY
+
+      - name: make check
+        run: make check || true   # Ollama isn't present in CI; don't fail the gate on it
