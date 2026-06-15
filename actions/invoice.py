@@ -35,6 +35,10 @@ def generate(data):
 
     if not items:
         return {"success": False, "error": "Tiada item dalam invoice."}
+    if not (0 <= tax_rate <= 100):
+        return {"success": False, "error": f"Kadar cukai mesti antara 0 dan 100 (bukan {tax_rate}%)."}
+    if discount < 0:
+        return {"success": False, "error": "Diskaun tidak boleh negatif."}
 
     rows = []
     subtotal = 0
@@ -42,6 +46,8 @@ def generate(data):
         desc = item[0] if len(item) > 0 else "Item"
         qty = float(item[1]) if len(item) > 1 else 1
         price = float(item[2]) if len(item) > 2 else 0
+        if qty < 0 or price < 0:
+            return {"success": False, "error": f"Kuantiti dan harga tidak boleh negatif (item {i+1}: qty={qty}, harga={price})."}
         total = qty * price
         subtotal += total
         rows.append({"description": desc, "qty": qty, "price": price, "total": round(total, 2)})
